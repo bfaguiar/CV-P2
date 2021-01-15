@@ -6,6 +6,17 @@ import numpy as np
 import time
 import sys
 
+import glob
+# termination criteria
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
+objp = np.zeros((6*7,3), np.float32)
+objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
+# Arrays to store object points and image points from all the images.
+objpoints = [] # 3d point in real world space
+imgpoints = [] # 2d points in image plane.
+
+
 url='http://192.168.1.83:8080/shot.jpg' ## default IP
 
 if len(sys.argv) == 2:
@@ -23,8 +34,50 @@ while True:
     cv.imshow("ola", edged)
     
     contours, hierarchy = cv.findContours(edged, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    cv.drawContours(img, contours, -1, (0,255,0), 3)
-    cv.imshow("Normal", img) # show the normal image
+
+    for cnt in contours:
+        approx = cv.approxPolyDP(cnt, 0.009*cv.arcLength(cnt,True), True)
+        if len(approx)==5: 
+            print("pentagon") 
+            cv.drawContours(img,[cnt],0,255,5) 
+        elif len(approx)==3: 
+            print("triangle") 
+            cv.drawContours(img,[cnt],0,(0,255,0),5) 
+        elif len(approx)==4: 
+            print("square") 
+            cv.drawContours(img,[cnt],0,(0,0,255),5) 
+        elif len(approx) == 9: 
+            print("half-circle") 
+            cv.drawContours(img,[cnt],0,(255,255,0),5) 
+        elif len(approx) > 15: 
+            print("circle") 
+            cv.drawContours(img,[cnt],0,(0,255,255), 5)  
+        
+        # GET COORDINATES
+        n = approx.ravel()
+        i = 0
+        for j in n:
+            if(i % 2 == 0): 
+                x = n[i] 
+                y = n[i + 1] 
+    
+                # String containing the co-ordinates. 
+                string = str(x) + " " + str(y)  
+    
+                if(i == 0): 
+                    # text on topmost co-ordinate. 
+                    cv.putText(img, "Arrow tip", (x, y), 
+                                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0))  
+                else: 
+                    # text on remaining co-ordinates. 
+                    cv.putText(img, string, (x, y),  
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))  
+            i = i + 1
+    
+    cv.imshow("Final Image", img)  
+
+    #cv.drawContours(img, contours, -1, (0,255,0), 3)
+    #cv.imshow("Normal", img) # show the normal image
 
     if cv.waitKey(1) & 0xFF == ord('q'):
         break

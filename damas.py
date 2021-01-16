@@ -1,4 +1,3 @@
-#
 import urllib.request
 import cv2 as cv
 import numpy as np
@@ -6,10 +5,10 @@ import time
 import sys
 #
 #
-url='http://192.168.1.83:8080/shot.jpg' ## default IP
-
+#url='http://192.168.1.83:8080/shot.jpg' ## default IP
+url='http://192.168.1.215:8080/shot.jpg' ## default IP
 if len(sys.argv) == 2:
-    url = sys.argv[1] + "/shot.jpg" ## pass IP from the command line
+    url = "http://192.168.1."+ sys.argv[1] + ":8080/shot.jpg" ## pass IP from the command line
 
 while True:
 

@@ -1,8 +1,10 @@
+# Paulo Sousa, 80000
+# Bruno Aguiar, 80177
 import urllib.request
 import cv2 as cv
 import numpy as np
 import time
-import sys
+import sys 
 
 url='http://192.168.1.215:8080/shot.jpg' ## default IP
 if len(sys.argv) == 2:
@@ -24,7 +26,7 @@ while True:
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     blur = cv.GaussianBlur(gray, (7, 7), 0)
     edged = cv.Canny(blur, 100, 200)
-    cv.imshow("ola", edged)
+    cv.imshow("Edge Canny", edged) 
     contours, hierarchy = cv.findContours(edged, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     
     array = []
@@ -82,7 +84,7 @@ while True:
     # Set range for blue color and  
     # define mask 
     blue_lower = np.array([94, 70, 2], np.uint8) 
-    blue_upper = np.array([140, 255, 255], np.uint8) 
+    blue_upper = np.array([120, 200, 200], np.uint8) 
     blue_mask = cv.inRange(colored, blue_lower, blue_upper) 
     res3 = cv.bitwise_and(colored, colored, mask=blue_mask)
     res3 = cv.GaussianBlur(res3, (7, 7), 0)
@@ -96,8 +98,8 @@ while True:
             x_azul, y_azul, r_azul = i
             cv.circle(rendering2D, (x_azul, y_azul), 50, (255, 0, 0), -1) 
     print (circles)
-    cv.imshow("green", res2)
-    cv.imshow("Azul", res3)
+    cv.imshow("green Mask", res2)
+    cv.imshow("Azul Mask", res3)
     cv.imshow("Edge Detection Image", img)  
     cv.imshow("Checkers Game", rendering2D)
 

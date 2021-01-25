@@ -8,8 +8,8 @@ url='http://192.168.1.215:8080/shot.jpg' ## default IP
 if len(sys.argv) == 2:
     url = "http://192.168.1."+ sys.argv[1] + ":8080/shot.jpg" ## pass IP from the command line
 
-x, y, raio = 0, 0, 0 
-
+x_verde, y_verde, raio_verde = 0, 0, 0 
+x_azul, y_azul, r_azul = 0, 0, 0
 while True:
 
     imgResp = urllib.request.urlopen(url) ## getting the image from the IP Camera
@@ -62,17 +62,10 @@ while True:
         coor2 = (int(p2[0]), int(p2[1]))
         cv.rectangle(rendering2D, coor1, coor2, (0, 0, 0), -1)
     
-    # Set range for red color and  §1
-    # define mask 
-    red_lower = np.array([136, 87, 111], np.uint8) 
-    red_upper = np.array([180, 255, 255], np.uint8) 
-    red_mask = cv.inRange(colored, red_lower, red_upper) 
-    res1 = cv.bitwise_and(colored, colored, mask=red_mask)
-    
     # Set range for green color and  
     # define mask 
     green_lower = np.array([25, 52, 72], np.uint8) 
-    green_upper = np.array([102, 255, 255], np.uint8) 
+    green_upper = np.array([85, 255, 255], np.uint8) 
     green_mask = cv.inRange(colored, green_lower, green_upper) 
     res2 = cv.bitwise_and(colored, colored, mask=green_mask)
     res2 = cv.GaussianBlur(res2, (7, 7), 0)
@@ -81,30 +74,33 @@ while True:
     res2 = cv.dilate(res2, kernel, iterations=2)
     circles = cv.HoughCircles(res2, cv.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=0)
     if circles is not None:
-        print(type(circles))
-        print(circles)
         circles = np.uint16(np.around(circles))
-        print("OLA")
-        print("X: ", x) 
-        print("y: ", y)
-        print("raio: ", raio)
         for i in circles[0,:]:
-            x, y, raio = i  
-            cv.circle(rendering2D, (x, y), 50, (0, 255, 0), -1) 
-    
+            x_verde, y_verde, raio_verde = i  
+            cv.circle(rendering2D, (x_verde, y_verde), 50, (0, 255, 0), -1)  
+
     # Set range for blue color and  
     # define mask 
-    blue_lower = np.array([94, 80, 2], np.uint8) 
-    blue_upper = np.array([120, 255, 255], np.uint8) 
+    blue_lower = np.array([94, 70, 2], np.uint8) 
+    blue_upper = np.array([140, 255, 255], np.uint8) 
     blue_mask = cv.inRange(colored, blue_lower, blue_upper) 
-    res3 = cv.bitwise_and(colored, colored, mask=blue_mask)  
-
+    res3 = cv.bitwise_and(colored, colored, mask=blue_mask)
+    res3 = cv.GaussianBlur(res3, (7, 7), 0)
+    res3 = cv.Canny(res3, 100, 200)
+    kernel = np.ones((5,5),np.uint8)
+    res3 = cv.dilate(res3, kernel, iterations=2)
+    circles = cv.HoughCircles(res3, cv.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=0)
+    if circles is not None:
+        circles = np.uint16(np.around(circles))
+        for i in circles[0,:]:
+            x_azul, y_azul, r_azul = i
+            cv.circle(rendering2D, (x_azul, y_azul), 50, (255, 0, 0), -1) 
+    print (circles)
     cv.imshow("green", res2)
-    cv.imshow("azul", res3)
-    cv.imshow("bermelho", res1)
+    cv.imshow("Azul", res3)
+    cv.imshow("Edge Detection Image", img)  
+    cv.imshow("Checkers Game", rendering2D)
 
-    cv.imshow("Final Image", img)  
-    cv.imshow("JOGO DAS DAMAS:", rendering2D)
-    #cv.drawContours(img, contours, -1, (0,255,0), 3)
+
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
